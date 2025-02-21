@@ -1,0 +1,77 @@
+name: OpenWrt-CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      REPO_BRANCH:
+        description: 'lede源码'
+        required: true
+        default: 'master'
+        type: choice
+        options:
+          - 'master'
+      DEVICE:
+        description: 'Select the build device'
+        required: true
+        default: 'nanopi-r5s'
+        type: choice
+        options:
+          - 'nanopi-r5s'
+          - 'cudy-tr3000'
+      CCACHE:
+        description: 'Enable ccache (Use Cache to speed up next build)'
+        type: boolean
+        default: true
+
+env:
+  REPO_URL: https://github.com/coolsnowwolf/lede.git
+  REPO_BRANCH: ${{ github.event.inputs.REPO_BRANCH }}
+  SOURCE_PATH: '/openwrt/openwrt-source'
+  CONFIG_FILE: ${{ github.event.inputs.DEVICE }}.config
+  SSH_ACTIONS: false
+  TZ: Asia/Shanghai
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: master
+      - name: Space cleanup
+        uses: dd-ray/github-actions@free-disk
+      - name: Build System Setup
+        uses: dd-ray/github-actions@openwrt-build-setup
+        with:
+          build-mount-path: /openwrt
+      - name: clone OpenWrt
+        run: ./script/tool.sh clone
+      - name: cache
+        uses: klever1988/cachewrtbuild@main
+        with:
+          prefix: ${{ env.SOURCE_PATH }}
+          #是否一并缓存.ccache目录，如果你启用了ccache。这是唯一的常用参数，其他三个用于除错，一般不需要调整
+          ccache: ${{ github.event.inputs.CCACHE }}
+          #是否缓存工具链目录
+          toolchain: true
+          #是否跳过工具链编译
+          skip: true
+          #清空缓存
+          clean: false
+
+      - name: Update feeds
+        run: ./script/tool.sh update_feeds
+      - name: Generate configuration file
+        run: ./script/tool.sh build_config
+      - name: Make download
+        run: ./script/tool.sh make_download
+      - name: Compile firmware
+        run: ./script/tool.sh compile_firmware
+      - name: Clean Packages
+        run: rm -rf ${{env.SOURCE_PATH}}/bin/targets/*/*/packages
+      - name: Upload OpenWrt firmware
+        uses: actions/upload-artifact@master
+        with:
+          name: OpenWrt firmware
+          path: |
+            ${{env.SOURCE_PATH}}/bin/targets/
