@@ -41,6 +41,7 @@ function update_feeds() {
 function build_config() {
   cd $source_path || exit 1
   cp -f "../config/${CONFIG_FILE}" ".config"
+  echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config
   chmod +x ../script/diy.sh
   ../script/diy.sh "$(pwd)"
   du -h --max-depth=2 ./

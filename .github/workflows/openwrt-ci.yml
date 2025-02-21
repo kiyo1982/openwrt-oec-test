@@ -56,6 +56,7 @@ jobs:
           skip: true
           #清空缓存
           clean: false
+          mixkey: ${{ github.event.inputs.DEVICE }}
 
       - name: Update feeds
         run: ./script/tool.sh update_feeds
