@@ -36,17 +36,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: master
       - name: Space cleanup
         uses: dd-ray/github-actions@free-disk
       - name: Build System Setup
         uses: dd-ray/github-actions@openwrt-build-setup
         with:
           build-mount-path: /openwrt
-      - name: clone OpenWrt
+      - name: Clone OpenWrt
         run: ./script/tool.sh clone
-      - name: cache
+      - name: Cache
         uses: klever1988/cachewrtbuild@main
         with:
           prefix: ${{ env.SOURCE_PATH }}
