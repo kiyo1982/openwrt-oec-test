@@ -7,11 +7,11 @@
 # REPO_URL=https://github.com/openwrt/openwrt
 # REPO_BRANCH=24.10.0-rc7
 # CONFIG_FILE=r5s.config
-source_path=$SOURCE_PATH
-
+#SOURCE_PATH=$SOURCE_PATH
+# BUILDER_PATH=$BUILDER_PATH
 
 function install_dep() {
-  docker rmi `docker images -q`
+  docker rmi $(docker images -q)
   sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d /usr/local/lib/android
   sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* adoptopenjdk* mysql* php* mongodb* dotnet* moby* snapd* || true
   sudo -E apt-get update
@@ -28,22 +28,22 @@ function install_dep() {
 }
 
 function clone_source_code() {
-  git clone $REPO_URL -b $REPO_BRANCH $source_path
-  cd $source_path || exit 1
+  git clone "$REPO_URL" -b "$REPO_BRANCH" "$SOURCE_PATH"
+  cd "$SOURCE_PATH" || exit 1
 }
 
 function update_feeds() {
-  cd $source_path || exit 1
+  cd "$SOURCE_PATH" || exit 1
   ./scripts/feeds update -a
   ./scripts/feeds install -a
 }
 
 function build_config() {
-  cd $source_path || exit 1
-  cp -f "../config/${CONFIG_FILE}" ".config"
+  cd "$SOURCE_PATH" || exit 1
+  cp -f "${BUILDER_PATH}/config/${CONFIG_FILE}" ".config"
   echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config
-  chmod +x ../script/diy.sh
-  ../script/diy.sh "$(pwd)"
+  chmod +x "${BUILDER_PATH}/script/diy.sh"
+  bash -c "${BUILDER_PATH}/script/diy.sh ${SOURCE_PATH}"
   du -h --max-depth=2 ./
   echo "当前配置=====start"
   cat '.config'
@@ -51,7 +51,7 @@ function build_config() {
 }
 
 function make_download() {
-  cd $source_path || exit 1
+  cd "$SOURCE_PATH" || exit 1
   make defconfig
   make download -j8
   find ./dl/ -size -1024c -exec rm -f {} \;
@@ -59,7 +59,7 @@ function make_download() {
 }
 
 function compile_firmware() {
-  cd $source_path || exit 1
+  cd "$SOURCE_PATH" || exit 1
   make -j$(nproc) || make -j1 V=s
   if [ $? -eq 0 ]; then
     echo "编译完成"

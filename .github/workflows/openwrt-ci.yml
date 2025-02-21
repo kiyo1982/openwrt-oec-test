@@ -28,14 +28,16 @@ env:
   REPO_BRANCH: ${{ github.event.inputs.REPO_BRANCH }}
   SOURCE_PATH: '/openwrt/openwrt-source'
   CONFIG_FILE: ${{ github.event.inputs.DEVICE }}.config
-  SSH_ACTIONS: false
   TZ: Asia/Shanghai
+  BUILDER_PATH: ${{ github.workspace }}/openwrt-builder
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          path: openwrt-builder
       - name: Space cleanup
         uses: dd-ray/github-actions@free-disk
         with:
