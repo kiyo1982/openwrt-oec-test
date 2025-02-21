@@ -30,6 +30,7 @@ env:
   CONFIG_FILE: ${{ github.event.inputs.DEVICE }}.config
   TZ: Asia/Shanghai
   BUILDER_PATH: ${{ github.workspace }}
+  LATEST_RELEASE: "OpenWrt-v24.10.0"
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -68,6 +69,17 @@ jobs:
         run: ./script/tool.sh compile_firmware
       - name: Clean Packages
         run: rm -rf ${{env.SOURCE_PATH}}/bin/targets/*/*/packages
+      - name: Create release
+        uses: ncipollo/release-action@v1.14.0
+        with:
+          name: OpenWrt-${{ env.LATEST_RELEASE }}
+          allowUpdates: true
+          tag: ${{ env.LATEST_RELEASE }}
+          commit: main
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: |
+            ${{env.SOURCE_PATH}}/bin/targets/*
       - name: Upload OpenWrt firmware
         uses: actions/upload-artifact@master
         with:
