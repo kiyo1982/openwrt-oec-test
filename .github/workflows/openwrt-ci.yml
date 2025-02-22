@@ -77,7 +77,6 @@ jobs:
           tag: ${{ env.LATEST_RELEASE }}
           commit: main
           replacesArtifacts: true
-          token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: |
             ${{env.SOURCE_PATH}}/bin/targets/*
       - name: Upload OpenWrt firmware
