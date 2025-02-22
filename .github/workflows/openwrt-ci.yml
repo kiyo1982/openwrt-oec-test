@@ -78,7 +78,7 @@ jobs:
           commit: main
           replacesArtifacts: true
           artifacts: |
-            ${{env.SOURCE_PATH}}/bin/targets/*
+            ${{env.SOURCE_PATH}}/bin/targets/*/*/openwrt-*
       - name: Upload OpenWrt firmware
         uses: actions/upload-artifact@master
         with:
