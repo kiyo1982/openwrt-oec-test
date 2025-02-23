@@ -61,11 +61,11 @@ function make_download() {
 function compile_firmware() {
   cd "$SOURCE_PATH" || exit 1
   make -j$(nproc) || make -j1 V=s
-  if [ $? -eq 0 ]; then
-    echo "编译完成"
-  else
-    echo "编译完成！"
+  if [ $? -ne 0 ]; then
+    echo "编译失败！！！"
+    exit 1
   fi
+  echo "编译完成"
   echo "======================="
   echo "Space usage:"
   echo "======================="
