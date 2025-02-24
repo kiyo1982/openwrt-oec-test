@@ -10,14 +10,6 @@ on:
         type: choice
         options:
           - 'master'
-      DEVICE:
-        description: 'Select the build device'
-        required: true
-        default: 'nanopi-r5s'
-        type: choice
-        options:
-          - 'nanopi-r5s'
-          - 'cudy-tr3000'
       CCACHE:
         description: 'Enable ccache (Use Cache to speed up next build)'
         type: boolean
@@ -27,13 +19,17 @@ env:
   REPO_URL: https://github.com/coolsnowwolf/lede.git
   REPO_BRANCH: ${{ github.event.inputs.REPO_BRANCH }}
   SOURCE_PATH: '/openwrt/openwrt-source'
-  CONFIG_FILE: ${{ github.event.inputs.DEVICE }}.seed
   TZ: Asia/Shanghai
   BUILDER_PATH: ${{ github.workspace }}
   LATEST_RELEASE: "OpenWrt-v24.10.0"
 jobs:
   build:
     runs-on: ubuntu-latest
+    name: Build ${{matrix.DEVICE}}
+    strategy:
+      fail-fast: false
+      matrix:
+        DEVICE: [ 'nanopi-r5s', 'cudy-tr3000' ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -57,11 +53,13 @@ jobs:
           skip: true
           #清空缓存
           clean: false
-          mixkey: ${{ github.event.inputs.DEVICE }}
+          mixkey: ${{ matrix.DEVICE }}
 
       - name: Update feeds
         run: ./script/tool.sh update_feeds
       - name: Generate configuration file
+        env:
+          CONFIG_FILE: ${{ matrix.DEVICE }}.seed
         run: ./script/tool.sh build_config
       - name: Make download
         run: ./script/tool.sh make_download
