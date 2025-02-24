@@ -7,7 +7,7 @@
 # REPO_URL=https://github.com/openwrt/openwrt
 # REPO_BRANCH=24.10.0-rc7
 # CONFIG_FILE=r5s.config
-#SOURCE_PATH=$SOURCE_PATH
+# SOURCE_PATH=$SOURCE_PATH
 # BUILDER_PATH=$BUILDER_PATH
 
 function install_dep() {
